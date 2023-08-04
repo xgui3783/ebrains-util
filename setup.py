@@ -11,6 +11,9 @@ setup(
     install_requires=[
         "ebrains_iam @ git+https://github.com/xgui3783/ebrains-iam-util.git",
         "ebrains_dataproxy_sync @ git+https://github.com/xgui3783/ebrains_dataproxy_sync.git",
-        "ebrains-kg-snap @ git+https://github.com/xgui3783/ebrains-kg-snap.git",
+        "ebrains-kg-snap",
+    ],
+    dependency_links=[
+        "git+https://github.com/xgui3783/ebrains-kg-snap.git#egg=ebrains-kg-snap"
     ]
 )
