@@ -10,7 +10,7 @@ setup(
     python_requires=">=3.7",
     install_requires=[
         "ebrains_iam @ git+https://github.com/xgui3783/ebrains-iam-util.git",
-        # "ebrains-dataproxy-sync @ git+https://github.com/xgui3783/ebrains_dataproxy_sync.git",
+        "ebrains-dataproxy-sync @ git+https://github.com/xgui3783/ebrains_dataproxy_sync.git",
         "ebrains_kg_snap @ git+https://github.com/xgui3783/ebrains-kg-snap.git",
     ]
 )
