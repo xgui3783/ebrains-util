@@ -14,6 +14,7 @@ setup(
         "ebrains-dataproxy-sync @ git+https://github.com/xgui3783/ebrains_dataproxy_sync.git",
         "ebrains_kg_snap @ git+https://github.com/xgui3783/ebrains-kg-snap.git",
         "click",
+        "tqdm",
     ],
     entry_points={
         "console_scripts": [

@@ -52,8 +52,8 @@ def auth():
 @click.command()
 @click.option("--scope", help="Comma separated additional scopes to ask for. e.g. profile,group,team,email")
 @click.option("--force", "-f", help="Do not check existing token.", is_flag=True)
-@click.option("--print", "-p", help="Print token to stdout.", is_flag=True)
-def login(scope:str, force: bool, p: bool):
+@click.option("--print", "printflag", help="Print token to stdout.", is_flag=True)
+def login(scope:str, force: bool, printflag: bool):
     parsed_scopes=[scope for scope in (scope or "").split(",") if scope]
     if not force:
         try:
@@ -76,9 +76,9 @@ def login(scope:str, force: bool, p: bool):
     token = start_device_flow(scope=parsed_scopes)
     with open(token_path, "w") as fp:
         fp.write(token)
-        if p:
+        if printflag:
             print(token)
-    print("Auth successful!")
+    print("Auth successful!", file=sys.stderr)
 
 auth.add_command(login, "login")
 
@@ -90,17 +90,25 @@ auth.add_command(logout, "logout")
 
 @click.command()
 @click.option("--ignore-expiry", "-i", help="Do not try to check expiry.", is_flag=True)
-def _print(ignore_expiry):
+@click.option("--decode", help="Decode jwt", is_flag=True)
+def _print(ignore_expiry, decode):
     try:
         token = get_current_token()
         if not ignore_expiry:
             if token.is_expired():
-                print("Token expired")
+                print("Token expired", file=sys.stderr)
                 sys.exit(1)
-                
+        if decode:
+            hdr_json, info_json, sig = decode_jwt(token.token)
+            print(json.dumps(hdr_json, indent=2))
+            print("=====")
+            print(json.dumps(info_json, indent=2))
+            print("=====")
+            print(sig)
+            return
         print(token.token)
     except TokenDoesNotExistException:
-        print("Token not found.")
+        print("Token not found.", file=sys.stderr)
         sys.exit(1)
 
 auth.add_command(_print, "print")

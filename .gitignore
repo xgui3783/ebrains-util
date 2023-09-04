@@ -2,3 +2,5 @@ __pycache__
 venv
 snapshot
 ebrainsquery
+*.egg-info
+*.zip
