@@ -28,6 +28,18 @@ dataproxy.dataproxy_sync("my-bucket", path_to_my_file)
 
 ```
 
+or from command line:
+
+```sh
+
+echo "hello world" > foo.bar
+
+# team is needed for dataproxy!
+ebrains_util iam auth login --scope team
+ebrains_util bucket -n MY_BUCKET_NAME upload foo.bar dest/foo.bar
+
+```
+
 ## License
 
 MIT
