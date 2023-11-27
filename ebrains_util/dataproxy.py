@@ -10,6 +10,8 @@ import shutil
 from typing import Union, Callable
 from io import IOBase
 import os
+from io import BytesIO
+from typing import List
 
 @dataclass
 class CtxBucket:
@@ -129,19 +131,35 @@ class ProgressReader(IOBase):
         self.fh.close()
 
 @click.command()
-@click.option("--progress", help="Show progress of upload", is_flag=True)
+@click.option("--progress", help="Show progress of upload. Cannot be used with stdin", is_flag=True)
+@click.option("--header", "-H", required=False, type=str, multiple=True)
 @click.argument("filename", required=True, type=str)
 @click.argument("dest", required=True, type=str)
 @pass_bucket
-def upload(bucket_ctx: CtxBucket, filename: str, dest: str, progress: bool):
+def upload(bucket_ctx: CtxBucket, filename: str, dest: str, progress: bool, header: List[str]):
+    """Use - at filename to read from stdin"""
     bucket = bucket_ctx.get_bucket()
+
+    headers = {}
+    for hdr in header:
+        try:
+            header_name, header_value = hdr.split(":", 1)
+            headers[header_name] = header_value.strip()
+        except ValueError as e:
+            raise ValueError("header must be in the format of [header_name]:[header_value]") from e
+
     if progress:
+        if filename == "-":
+            raise Exception(f"progress flag cannot be used with stdin")
         fh = ProgressReader(filename, lambda n: print("updated", n))
         with tqdm.tqdm(total=fh.size) as tqdmp:
             fh.update = lambda n: tqdmp.update(n)
-            bucket.upload(fh, dest)
+            bucket.upload(fh, dest, headers=headers)
     else:
-        bucket.upload(filename, dest)
+        if filename == "-":
+            filename = BytesIO(sys.stdin.buffer.read())
+            filename.seek(0)
+        bucket.upload(filename, dest, headers=headers)
 
 bucket.add_command(upload, "upload")
 
