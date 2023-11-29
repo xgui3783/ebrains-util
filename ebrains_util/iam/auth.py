@@ -64,8 +64,14 @@ auth.add_command(set_token, "set-token")
 @click.option("--scope", help="Comma separated additional scopes to ask for. e.g. profile,group,team,email")
 @click.option("--force", "-f", help="Do not check existing token.", is_flag=True)
 @click.option("--print", "printflag", help="Print token to stdout.", is_flag=True)
-def login(scope:str, force: bool, printflag: bool):
-    """Login (via siibra)"""
+@click.option("--client-id", help="client-id for client credential flow")
+@click.option("--client-secret", help="client-secret for client credential flow")
+def login(scope:str, force: bool, printflag: bool, client_id: str, client_secret: str):
+    """Login (via siibra)
+    
+    if --client-id is provided, will overwrite the default client-id (siibra)
+    if --client-secret is provided, will use client credential flow
+    otherwise will use device flow."""
     parsed_scopes=[scope for scope in (scope or "").split(",") if scope]
     if not force:
         try:
@@ -85,11 +91,14 @@ def login(scope:str, force: bool, printflag: bool):
             pass
 
     token_path.parent.mkdir(exist_ok=True, parents=True, mode=700)
-    token = start_device_flow(scope=parsed_scopes)
-    with open(token_path, "w") as fp:
-        fp.write(token)
-        if printflag:
-            print(token)
+    if client_id and client_secret:
+        sess = ClientCredentialsSession(client_id, client_secret, scope=parsed_scopes)
+        token = sess.get_token()
+    else:
+        token = start_device_flow(scope=parsed_scopes, client_id=client_id)
+    token_path.write_text(token)
+    if printflag:
+        print(token)
     print("Auth successful!", file=sys.stderr)
 
 auth.add_command(login, "login")
