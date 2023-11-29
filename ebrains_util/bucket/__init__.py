@@ -18,7 +18,7 @@ class CtxBucket:
     bucket_name: str
 
     def get_bucket(self):
-        from .iam import get_current_token, TokenDoesNotExistException
+        from ..iam import get_current_token, TokenDoesNotExistException
         try:
             _token = get_current_token()
             token = None if _token.is_expired() else _token.token
@@ -35,6 +35,7 @@ pass_bucket = click.make_pass_decorator(CtxBucket)
 @click.option("--bucket-name", "-n", required=True, type=str, help="Name of the bucket.")
 @click.pass_context
 def bucket(ctx, bucket_name: str):
+    """Bucket API (ls/upload/download)"""
     ctx.obj = CtxBucket(bucket_name=bucket_name)
 
 
@@ -43,6 +44,7 @@ def bucket(ctx, bucket_name: str):
 @click.option("--json", "jsonflag", help="Output as JSON", is_flag=True)
 @pass_bucket
 def ls(bucket_ctx: CtxBucket, prefix: str, jsonflag: bool):
+    """List files."""
     bucket = bucket_ctx.get_bucket()
     all_names = [f.name for f in bucket.ls(prefix=prefix)]
     if len(all_names) == 0:
@@ -73,7 +75,9 @@ def get_dest_file(filename: str, dest: str, force=False) -> Path:
 @click.argument("dest", required=False, type=str)
 @pass_bucket
 def download(bucket_ctx: CtxBucket, filename: str, dest: str, force: bool):
-    """Set dest to - to stream to stdout"""
+    """Download file.
+    
+    Set dest to - to stream to stdout."""
 
     stream_to_stdout = dest == "-"
 
@@ -132,12 +136,14 @@ class ProgressReader(IOBase):
 
 @click.command()
 @click.option("--progress", help="Show progress of upload. Cannot be used with stdin", is_flag=True)
-@click.option("--header", "-H", required=False, type=str, multiple=True)
+@click.option("--header", "-H", required=False, type=str, multiple=True, help="Add custom headers on upload. Similar to curl usage. Can be set multiple times")
 @click.argument("filename", required=True, type=str)
 @click.argument("dest", required=True, type=str)
 @pass_bucket
 def upload(bucket_ctx: CtxBucket, filename: str, dest: str, progress: bool, header: List[str]):
-    """Use - at filename to read from stdin"""
+    """Upload file.
+    
+    Use - at filename to read from stdin"""
     bucket = bucket_ctx.get_bucket()
 
     headers = {}
@@ -170,6 +176,7 @@ bucket.add_command(upload, "upload")
 @click.argument("dstpath", required=False, default=".", type=str)
 @pass_bucket
 def sync(bucket_ctx: CtxBucket, hash_flag: bool, srcpath: str, dstpath: str):
+    """Sync directory/file."""
     if hash_flag:
         from ebrains_dataproxy_sync.hash.hash import hash_dir
         hash_dir(Path(srcpath))
@@ -177,7 +184,7 @@ def sync(bucket_ctx: CtxBucket, hash_flag: bool, srcpath: str, dstpath: str):
     prev_auth_token = os.environ.get("AUTH_TOKEN")
     try:
         from ebrains_dataproxy_sync.sync.dataproxy import sync
-        from .iam import get_current_token
+        from ..iam import get_current_token
         token = get_current_token()
         os.environ["AUTH_TOKEN"] = token.token
         sync(bucket_ctx.bucket_name, Path(srcpath), dstpath)

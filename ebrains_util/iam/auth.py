@@ -1,10 +1,10 @@
 from ebrains_iam.device_flow import start as start_device_flow
 from ebrains_iam.client_credential import ClientCredentialsSession
-from .config import token_path
+from ..config import token_path
 import json
 import click
 import base64
-from typing import Tuple, List
+from typing import List
 from dataclasses import dataclass
 import time
 import sys
@@ -48,12 +48,13 @@ def delete_curr_token():
 
 @click.group()
 def auth():
+    """Everthing auth related (login/logout, print/debug/set token)"""
     pass
 
 @click.command()
 @click.argument("token", required=True, type=str)
 def set_token(token: str):
-    """Set token, if one already exists"""
+    """Set token"""
     token_path.parent.mkdir(exist_ok=True, parents=True, mode=700)
     token_path.write_text(token)
 
@@ -64,6 +65,7 @@ auth.add_command(set_token, "set-token")
 @click.option("--force", "-f", help="Do not check existing token.", is_flag=True)
 @click.option("--print", "printflag", help="Print token to stdout.", is_flag=True)
 def login(scope:str, force: bool, printflag: bool):
+    """Login (via siibra)"""
     parsed_scopes=[scope for scope in (scope or "").split(",") if scope]
     if not force:
         try:
@@ -94,6 +96,7 @@ auth.add_command(login, "login")
 
 @click.command()
 def logout():
+    """Logout"""
     delete_curr_token()
 
 auth.add_command(logout, "logout")
@@ -102,6 +105,7 @@ auth.add_command(logout, "logout")
 @click.option("--ignore-expiry", "-i", help="Do not try to check expiry.", is_flag=True)
 @click.option("--decode", help="Decode jwt", is_flag=True)
 def _print(ignore_expiry, decode):
+    """Print token"""
     try:
         token = get_current_token()
         if not ignore_expiry:
