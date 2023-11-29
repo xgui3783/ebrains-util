@@ -1,4 +1,6 @@
 from pathlib import Path
-from  os.path import expanduser
+import os
 
-token_path = Path(expanduser("~/.ebrains_util/auth_token"))
+EBRAINS_UTIL_USER_PATH = os.getenv("EBRAINS_UTIL_USER_PATH", os.path.expanduser("~/.ebrains_util"))
+
+token_path = Path(EBRAINS_UTIL_USER_PATH) / "auth_token"

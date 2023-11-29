@@ -37,6 +37,8 @@ ebrains_util bucket -n MY_BUCKET_NAME upload foo.bar dest/foo.bar
 
 ```
 
+If you would like the auth token to be stored/used from a different path, set `EBRAINS_UTIL_USER_PATH` env var.
+
 ## License
 
 MIT
