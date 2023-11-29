@@ -43,11 +43,19 @@ def get_current_token() -> TokenObj:
 def delete_curr_token():
     if token_path.exists():
         token_path.unlink()
+        token_path.parent.rmdir()
     
 
 @click.group()
 def auth():
     pass
+
+@click.command()
+@click.argument("token", required=True, type=str)
+def set_token(token: str):
+    """Set token, if one already exists"""
+    token_path.parent.mkdir(exist_ok=True, parents=True, mode=700)
+    token_path.write_text(token)
 
 @click.command()
 @click.option("--scope", help="Comma separated additional scopes to ask for. e.g. profile,group,team,email")
@@ -72,7 +80,7 @@ def login(scope:str, force: bool, printflag: bool):
         except TokenDoesNotExistException:
             pass
 
-    token_path.parent.mkdir(exist_ok=True, parents=True)
+    token_path.parent.mkdir(exist_ok=True, parents=True, mode=700)
     token = start_device_flow(scope=parsed_scopes)
     with open(token_path, "w") as fp:
         fp.write(token)

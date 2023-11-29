@@ -3,9 +3,6 @@
 ## Installation
 
 ```sh
-
-# important! must install version_query first, or installation will not succeed
-pip install version_query
 pip install git+https://github.com/xgui3783/ebrains-util.git
 ```
 
