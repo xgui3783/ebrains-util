@@ -63,7 +63,7 @@ auth.add_command(set_token, "set-token")
 @click.command()
 @click.option("--scope", help="Comma separated additional scopes to ask for. e.g. profile,group,team,email")
 @click.option("--force", "-f", help="Do not check existing token.", is_flag=True)
-@click.option("--print", "printflag", help="Print token to stdout.", is_flag=True)
+@click.option("--print", "printflag", help="Print token to stdout. Will not save. (Useful for one time generation of token)", is_flag=True)
 @click.option("--client-id", help="client-id for client credential flow")
 @click.option("--client-secret", help="client-secret for client credential flow")
 def login(scope:str, force: bool, printflag: bool, client_id: str, client_secret: str):
@@ -96,9 +96,11 @@ def login(scope:str, force: bool, printflag: bool, client_id: str, client_secret
         token = sess.get_token()
     else:
         token = start_device_flow(scope=parsed_scopes, client_id=client_id)
-    token_path.write_text(token)
+
     if printflag:
         print(token)
+        return
+    token_path.write_text(token)    
     print("Auth successful!", file=sys.stderr)
 
 auth.add_command(login, "login")
