@@ -57,6 +57,8 @@ def set_token(token: str):
     token_path.parent.mkdir(exist_ok=True, parents=True, mode=700)
     token_path.write_text(token)
 
+auth.add_command(set_token, "set-token")
+
 @click.command()
 @click.option("--scope", help="Comma separated additional scopes to ask for. e.g. profile,group,team,email")
 @click.option("--force", "-f", help="Do not check existing token.", is_flag=True)
