@@ -6,7 +6,7 @@ setup(
     author="Xiao Gui",
     author_email="xgui3783@gmail.com",
     description="ebrains util",
-    packages=find_packages(include=["ebrains_util"]),
+    packages=find_packages(include=["ebrains_util", "ebrains_util.*"]),
     py_modules=['ebrains_util'],
     python_requires=">=3.7",
     install_requires=[
