@@ -87,13 +87,13 @@ def download(bucket_ctx: CtxBucket, filename: str, dest: str, force: bool):
     
     resp = requests.get(link, stream=True)
     resp.raise_for_status()
-    total_size = resp.headers.get("content-length")
+    total_size = resp.headers.get("content-length") and int(resp.headers.get("content-length"))
 
     if not stream_to_stdout:
         dest_file = get_dest_file(filename, dest)
         tmp_dest_file = dest_file.with_stem(f"tmp_{dest_file.name}")
         fh = open(tmp_dest_file, "wb")
-        progress = tqdm.tqdm(total=total_size)
+        progress = tqdm.tqdm(total=total_size) if total_size else tqdm.tqdm()
     else:
         fh = sys.stdout
 
