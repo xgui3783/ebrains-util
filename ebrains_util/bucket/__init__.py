@@ -60,12 +60,18 @@ bucket.add_command(ls, "ls")
 def get_dest_file(filename: str, dest: str, force=False) -> Path:
 
     _dest = Path(dest or ".")
-    if _dest.is_dir():
-        return _dest / Path(filename).name
-    if _dest.is_file():
+
+    if _dest.exists():
+        if _dest.is_dir():
+            return _dest / Path(filename).name
         if force:
             return _dest
         raise RuntimeError(f"Dest {str(dest)} already exists")
+    
+    if _dest.name.endswith("/"):
+        _dest.mkdir(parents=True)
+        return _dest / Path(filename).name
+    
     return _dest
 
 
