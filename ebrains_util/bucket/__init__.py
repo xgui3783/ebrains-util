@@ -72,6 +72,7 @@ def get_dest_file(filename: str, dest: str, force=False) -> Path:
         _dest.mkdir(parents=True)
         return _dest / Path(filename).name
     
+    _dest.parent.mkdir(parents=True, exist_ok=True)
     return _dest
 
 
