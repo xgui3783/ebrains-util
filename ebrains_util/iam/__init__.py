@@ -1,5 +1,6 @@
 import click
 from .auth import auth, get_current_token, TokenDoesNotExistException
+from .admin import admin
 
 @click.group()
 def iam():
@@ -7,6 +8,7 @@ def iam():
     pass
 
 iam.add_command(auth)
+iam.add_command(admin)
 
 __all__ = [
     "iam",
