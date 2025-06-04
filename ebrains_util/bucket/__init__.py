@@ -179,11 +179,23 @@ bucket.add_command(upload, "upload")
 
 @click.command()
 @click.option("--hash", "hash_flag", help="Hash directory first. This helps reduce duplicated work for multiple duplicated directories.", is_flag=True)
+@click.option("--reverse", "reverse_flag", help="Sync download. If set, will try to get token. If does not exist, will try to download file as if the bucket is public. Ignores --hash flag.", is_flag=True)
 @click.argument("srcpath", required=True, type=str)
 @click.argument("dstpath", required=False, default=".", type=str)
 @pass_bucket
-def sync(bucket_ctx: CtxBucket, hash_flag: bool, srcpath: str, dstpath: str):
+def sync(bucket_ctx: CtxBucket, hash_flag: bool, reverse_flag:bool, srcpath: str, dstpath: str):
     """Sync directory/file."""
+    if reverse_flag:
+        from ebrains_dataproxy_sync.sync.dataproxy import sync_down
+        try:
+            from ..iam import get_current_token
+            token = get_current_token()
+            os.environ["AUTH_TOKEN"] = token.token
+        except:
+            print("Token not found. Trying to sync down assuming public bucket")
+        sync_down(bucket_ctx.bucket_name, Path(srcpath), dstpath)
+        return
+
     if hash_flag:
         from ebrains_dataproxy_sync.hash.hash import hash_dir
         hash_dir(Path(srcpath))
