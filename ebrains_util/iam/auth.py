@@ -1,6 +1,3 @@
-from ebrains_iam.device_flow import start as start_device_flow
-from ebrains_iam.client_credential import ClientCredentialsSession
-from ..config import token_path
 import json
 import click
 import base64
@@ -8,6 +5,20 @@ from typing import List
 from dataclasses import dataclass
 import time
 import sys
+from functools import wraps
+from typing import Callable
+
+from ebrains_iam.device_flow import start as start_device_flow
+from ebrains_iam.refresh import smart_refresh
+from ebrains_iam.client_credential import ClientCredentialsSession
+
+from ..config import (
+    token_path,
+    EBRAINS_UTIL_CLIENT_ID,
+    EBRAINS_UTIL_CLIENT_SECRET,
+    EBRAINS_UTIL_REFRESH_TOKEN,
+    EBRAINS_UTIL_TOKEN_SCOPE,
+)
 
 class TokenDoesNotExistException(Exception): pass
 
@@ -22,6 +33,14 @@ class TokenObj:
         exp_utc_seconds = self.exp
         now_tc_seconds = time.time()
         return now_tc_seconds > exp_utc_seconds
+    
+    @classmethod
+    def from_str(cls, token_str: str):
+        hdr, info, sig = decode_jwt(token_str)
+        return cls(
+            token=token_str,
+            exp=info.get("exp"),
+            scope=info.get("scope").split(" "))
 
 def decode_jwt(token:str):    
     hdr, info, sig = token.split('.')
@@ -29,15 +48,52 @@ def decode_jwt(token:str):
     hdr_json = json.loads(base64.b64decode(hdr + '==').decode('utf-8'))
     return hdr_json, info_json, sig
 
-def get_current_token() -> TokenObj:
+def str_to_token(cache_to_file: bool=True):
+    def outer(fn: Callable[[], str]):
+        @wraps(fn)
+        def inner(*args, **kwargs):
+            token_str = fn(*args, **kwargs)
+            token = TokenObj.from_str(token_str)
+            if not token.is_expired():
+                if cache_to_file:
+                    token_path.parent.mkdir(exist_ok=True, parents=True, mode=0o700)
+                    token_path.write_text(token_str)
+                return token
+        return inner
+    return outer
+
+@str_to_token()
+def _get_token_refreshed():
+    if EBRAINS_UTIL_REFRESH_TOKEN and EBRAINS_UTIL_CLIENT_ID:
+        token, refresh_token, refreshed = smart_refresh(EBRAINS_UTIL_REFRESH_TOKEN, EBRAINS_UTIL_CLIENT_ID)
+        return token
+
+@str_to_token()
+def _get_token_s2s():
+    if EBRAINS_UTIL_CLIENT_ID and EBRAINS_UTIL_CLIENT_SECRET:
+        sess = ClientCredentialsSession(EBRAINS_UTIL_CLIENT_ID, EBRAINS_UTIL_CLIENT_SECRET, scope=EBRAINS_UTIL_TOKEN_SCOPE.split(" ") or [])
+        token = sess.get_token()
+        return token
+
+@str_to_token(cache_to_file=False)
+def _get_token_file():
     if token_path.exists():
         with open(token_path, "r") as fp:
-            token=fp.read()
-            hdr, info, sig = decode_jwt(token)
-        return TokenObj(
-            token=token,
-            exp=info.get("exp"),
-            scope=info.get("scope").split(" "))
+            return fp.read()
+
+def get_current_token() -> TokenObj:
+    token = _get_token_file()
+    if token:
+        return token
+    
+    token = _get_token_s2s()
+    if token:
+        return token
+    
+    token = _get_token_refreshed()
+    if token:
+        return token
+    
     raise TokenDoesNotExistException
 
 def delete_curr_token():
