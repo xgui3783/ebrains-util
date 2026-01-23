@@ -14,6 +14,7 @@ from ebrains_iam.client_credential import ClientCredentialsSession
 
 from ..config import (
     token_path,
+    EBRAINS_UTIL_AUTH_TOKEN,
     EBRAINS_UTIL_CLIENT_ID,
     EBRAINS_UTIL_CLIENT_SECRET,
     EBRAINS_UTIL_REFRESH_TOKEN,
@@ -81,8 +82,17 @@ def _get_token_file():
         with open(token_path, "r") as fp:
             return fp.read()
 
+@str_to_token()
+def _get_token_env():
+    if EBRAINS_UTIL_AUTH_TOKEN:
+        return EBRAINS_UTIL_AUTH_TOKEN
+
 def get_current_token() -> TokenObj:
     token = _get_token_file()
+    if token:
+        return token
+    
+    token = _get_token_env()
     if token:
         return token
     
