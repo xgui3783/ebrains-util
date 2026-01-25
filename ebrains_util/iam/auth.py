@@ -54,6 +54,8 @@ def str_to_token(cache_to_file: bool=True):
         @wraps(fn)
         def inner(*args, **kwargs):
             token_str = fn(*args, **kwargs)
+            if not token_str:
+                return
             token = TokenObj.from_str(token_str)
             if not token.is_expired():
                 if cache_to_file:
@@ -79,6 +81,7 @@ def _get_token_s2s():
 @str_to_token(cache_to_file=False)
 def _get_token_file():
     if token_path.exists():
+        
         with open(token_path, "r") as fp:
             return fp.read()
 
