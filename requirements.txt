@@ -1,5 +1,5 @@
 git+https://github.com/xgui3783/ebrains-iam-util.git
-git+https://github.com/xgui3783/ebrains_dataproxy_sync.git@e9b07df9d729ffca300df2a1e84d69cb3a6c16c0
+git+https://github.com/xgui3783/ebrains_dataproxy_sync.git@915af25bfdb02909744715149891b8f5c501b64d
 git+https://github.com/xgui3783/ebrains-kg-snap.git
 click
 tqdm

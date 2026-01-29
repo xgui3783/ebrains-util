@@ -181,10 +181,11 @@ bucket.add_command(upload, "upload")
 @click.option("--hash", "hash_flag", help="Hash directory first. This helps reduce duplicated work for multiple duplicated directories.", is_flag=True)
 @click.option("--reverse", "reverse_flag", help="Sync download. If set, will try to get token. If does not exist, will try to download file as if the bucket is public. Ignores --hash flag.", is_flag=True)
 @click.option("-C", "relative_to", help="If upload, upload path is determined relative to this path", type=str, default=None)
+@click.option("--max-workers", "max_workers", help="Configure max parallel", type=int, default=None)
 @click.argument("srcpath", required=True, type=str)
 @click.argument("dstpath", required=False, default=".", type=str)
 @pass_bucket
-def sync(bucket_ctx: CtxBucket, hash_flag: bool, reverse_flag:bool, relative_to:str, srcpath: str, dstpath: str):
+def sync(bucket_ctx: CtxBucket, hash_flag: bool, reverse_flag:bool, relative_to:str, max_workers:int, srcpath: str, dstpath: str):
     """Sync directory/file."""
     if reverse_flag:
         from ebrains_dataproxy_sync.sync.dataproxy import sync_down
@@ -207,7 +208,7 @@ def sync(bucket_ctx: CtxBucket, hash_flag: bool, reverse_flag:bool, relative_to:
         from ..iam import get_current_token
         token = get_current_token()
         os.environ["AUTH_TOKEN"] = token.token
-        sync(bucket_ctx.bucket_name, Path(srcpath), dstpath, local_relative_to=relative_to)
+        sync(bucket_ctx.bucket_name, Path(srcpath), dstpath, local_relative_to=relative_to, max_workers=max_workers)
     except Exception as e:
         print(f"Sync failed: {str(e)}", file=sys.stderr)
         sys.exit(1)
