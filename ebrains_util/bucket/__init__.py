@@ -1,17 +1,20 @@
+from dataclasses import dataclass
+from io import BytesIO
+from io import IOBase
+from pathlib import Path
+from typing import List
+from typing import Union, Callable
+import json
+import os
+import shutil
+import sys
+
 from ebrains_drive import BucketApiClient
 import click
-import sys
-import json
-from dataclasses import dataclass
 import requests
 import tqdm
-from pathlib import Path
-import shutil
-from typing import Union, Callable
-from io import IOBase
-import os
-from io import BytesIO
-from typing import List
+
+from .util import parse_dataproxy_url
 
 @dataclass
 class CtxBucket:
