@@ -43,6 +43,26 @@ def bucket(ctx, bucket_name: str):
 
 
 @click.command()
+@pass_bucket
+def create(bucket_ctx: CtxBucket):
+    """Create a bucket with the specified name"""
+    
+    from ..iam import get_current_token, TokenDoesNotExistException
+
+    _token = get_current_token()
+    if _token.is_expired():
+        raise TokenDoesNotExistException("Token expired. Please re-authenticate.")
+    
+    token = _token.token
+    client = BucketApiClient(token=token)
+    bucket_name = bucket_ctx.bucket_name
+    client.create_new(bucket_name, description=f"Created by ebrains_util https://github.com/xgui3783/ebrains-util")
+    print(f"collab and bucket {bucket_name} created.")
+
+bucket.add_command(create, "create")
+
+
+@click.command()
 @click.option("--prefix", help="Prefix to filter the ls result", type=str)
 @click.option("--json", "jsonflag", help="Output as JSON", is_flag=True)
 @pass_bucket
