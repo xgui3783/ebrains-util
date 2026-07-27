@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="ebrains-util",
-    version="0.0.1",
+    version="0.0.2",
     author="Xiao Gui",
     author_email="xgui3783@gmail.com",
     description="ebrains util",
@@ -13,7 +13,7 @@ setup(
         "ebrains_iam @ git+https://github.com/xgui3783/ebrains-iam-util.git@8411752baeb002535c27aeeb26effa6b9c68f2fe",
         "ebrains-dataproxy-sync @ git+https://github.com/xgui3783/ebrains_dataproxy_sync.git@fa7a09332cf52e0f249e5c7ad210e88076056cd2",
         "ebrains_kg_snap @ git+https://github.com/xgui3783/ebrains-kg-snap.git",
-        "ebrains_ingestion @ git+https://github.com/xgui3783/ebrains-ingestion.git@bc0c09f42a1b5ffcf3922363e156abb9b008543d",
+        "ebrains_ingestion @ git+https://github.com/xgui3783/ebrains-ingestion.git@441fb88dd0e6211ece838a18f8212f88c53767d4",
         "click",
         "tqdm",
     ],
