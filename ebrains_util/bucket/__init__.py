@@ -1,9 +1,7 @@
 from dataclasses import dataclass
-from io import BytesIO
-from io import IOBase
+from io import BytesIO, BufferedReader, FileIO
 from pathlib import Path
-from typing import List
-from typing import Union, Callable
+from typing import Union, Callable, List, Optional
 import json
 import os
 import shutil
@@ -147,22 +145,37 @@ def download(bucket_ctx: CtxBucket, filename: str, dest: str, force: bool):
 
 bucket.add_command(download, "download")
 
-class ProgressReader(IOBase):
-    def __init__(self, file: Union[str, Path], update: Callable) -> None:
-        super().__init__()
-        self.fh = open(file, "rb")
-        self.size = Path(file).stat().st_size
+class ProgressReader(BufferedReader):
+    """A BufferedReader that reports the number of bytes consumed via `update`
+    as the stream is read. Seek/tell/etc. behave like a normal buffered file."""
+
+    def __init__(self, file: Union[str, Path], update: Callable[[int], None]) -> None:
         self.update = update
-    
-    def __len__(self):
+        self.size = Path(file).stat().st_size
+        super().__init__(FileIO(file, "rb"))
+
+    def __len__(self) -> int:
         return self.size
 
-    def read(self, n):
-        self.update(n)
-        return self.fh.read(n)
+    def read(self, size: Optional[int] = -1) -> bytes:
+        chunk = super().read(size)
+        self.update(len(chunk))
+        return chunk
 
-    def close(self):
-        self.fh.close()
+    def read1(self, size: int = -1) -> bytes:
+        chunk = super().read1(size)
+        self.update(len(chunk))
+        return chunk
+
+    def readinto(self, b) -> int:
+        n = super().readinto(b)
+        self.update(n)
+        return n
+
+    def readinto1(self, b) -> int:
+        n = super().readinto1(b)
+        self.update(n)
+        return n
 
 @click.command()
 @click.option("--progress", help="Show progress of upload. Cannot be used with stdin", is_flag=True)

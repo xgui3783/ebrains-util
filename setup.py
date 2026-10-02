@@ -13,7 +13,7 @@ setup(
         "ebrains_iam @ git+https://github.com/xgui3783/ebrains-iam-util.git@8411752baeb002535c27aeeb26effa6b9c68f2fe",
         "ebrains-dataproxy-sync @ git+https://github.com/xgui3783/ebrains_dataproxy_sync.git@fa7a09332cf52e0f249e5c7ad210e88076056cd2",
         "ebrains_kg_snap @ git+https://github.com/xgui3783/ebrains-kg-snap.git",
-        "ebrains_ingestion @ git+https://github.com/xgui3783/ebrains-ingestion.git@441fb88dd0e6211ece838a18f8212f88c53767d4",
+        "ebrains_ingestion @ git+https://github.com/xgui3783/ebrains-ingestion.git@1114b5b8761342564c7f70c369e53a3bb38cee0f",
         "click",
         "tqdm",
     ],
