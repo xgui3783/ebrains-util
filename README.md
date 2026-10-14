@@ -75,6 +75,18 @@ ebrains_util upload https://data-proxy.ebrains.eu/my-bucket my_directory/myfile.
 
 ```
 
+## Team admin:
+
+```sh
+# adding bob to my-collab as a viewer
+ebrains_util iam auth login --scope clb.wiki.read,clb.wiki.write
+ebrains_util iam admin add-team --role viewer bob my-collab
+
+# adding OIDC client my-client as an admin (note the service-account- prefix)
+ebrains_util iam auth login --scope clb.wiki.read,clb.wiki.write
+ebrains_util iam admin add-team --role administrator service-account-my-client my-collab
+```
+
 ## Shell completion
 
 `ebrains_util` uses click. Per [click's documentation](https://click.palletsprojects.com/en/stable/shell-completion/), to use `ebrains_util` shell completion (e.g. `<tab>` to get autocomplete suggestions):
