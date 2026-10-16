@@ -8,6 +8,7 @@ import shutil
 import sys
 
 from ebrains_drive import BucketApiClient
+from ebrains_drive.bucket import Bucket
 import click
 import requests
 import tqdm
@@ -28,7 +29,8 @@ class CtxBucket:
         if token is None:
             print("Not authenticated. Using anonymous client. Only has read access to public buckets", file=sys.stderr)
         client = BucketApiClient(token=token)
-        return client.buckets.get_bucket(self.bucket_name)
+        return Bucket(client, self.bucket_name, None, None)
+
 
 pass_bucket = click.make_pass_decorator(CtxBucket)
 
